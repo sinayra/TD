@@ -1,0 +1,20 @@
+/****************************************
+ *Transmissão de Dados - Trabalho de Programação
+ *2014/2
+ *
+ *Professor: João Gondim
+ *
+ *Alunos:   Felipe Moreira Ramos    11/0011295
+ *          Jhonantans Moraes Rocha 11/0014090
+ *
+ *****************LEIAME******************
+ *
+ *  Para compilar no terminal:
+ *      gcc `libnet-config --defines` Head_or_Tail.c -o Ultimate `libnet-config --libs` -lpcap
+ *
+ *  Para executar no terminal:
+ *    sudo ./Ultimate -S src_port device ip
+ *    sudo./ Ultimate -H dst_port device ip
+ *
+ *****************************************/
+
