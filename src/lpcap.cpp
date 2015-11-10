@@ -1,6 +1,6 @@
 #include "../include/lpcap.h"
 
-void setDevice(char *argv[]){
+void lpcap_setDevice(){
     char errbuf[PCAP_ERRBUF_SIZE];
     string dev;
 
@@ -11,4 +11,9 @@ void setDevice(char *argv[]){
     }
 
     cout << "Device: " << dev << endl;
+}
+
+
+void lpcap_close(){
+    pcap_close();
 }

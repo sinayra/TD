@@ -9,5 +9,7 @@
 using namespace std;
 
 //Verifica se device é válido
-//Argumento deve ser argv que veio da main
-void setDevice(char *argv[]);
+void lpcap_setDevice();
+
+//Encerra sessao
+void lpcap_close();
