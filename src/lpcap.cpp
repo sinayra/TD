@@ -34,6 +34,28 @@ lpcapType lpcap_init(string port){
 
 void lpcap_process(lpcapType p){
 
+	//Prepara para limitar o trafico que vai ser inspecionado
+	//sessao do pcap do pacote com todas as caracteristicas da funçao compile, que vai capturar pacote
+	//filtro compilado
+	//string do filtro
+	//otimizaçao
+	//ip da rede
+	if (pcap_compile(p.handle, &(p.fp), p.filter_exp, 0, p.net) == -1) {
+		cout << "Erro ao realizar parsing da expressao '" << p.filter_exp << "' : " << pcap_geterr(p.handle) << endl;
+		cout << "Encerrando..." << endl;
+		exit(EXIT_FAILURE);
+	}
+	cout << "Rede pronta para ser filtada" << endl;
+	
+	//Limita o trafico inspecionado
+	if (pcap_setfilter(p.handle, &(p.fp)) == -1) {
+		cout << "Nao foi possivel inspecionar o trafico : " << pcap_geterr(p.handle) << endl;
+		cout << "Encerrando..." << endl;
+		exit(EXIT_FAILURE);
+	}
+	cout << "Rede filtrada" << endl;
+	
+}
 
 void lpcap_free(){
 
