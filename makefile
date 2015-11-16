@@ -1,6 +1,5 @@
 CFLAG=  -lpcap -lnet -O2
-PATHSRC ='.\src\'
-OBJS = lpcap.o
+OBJS = lpcap.o llibnet.o
 
 
 gossip: gossipCompleto
@@ -11,6 +10,9 @@ gossipCompleto: $(OBJS)  gossip.o
 
 lpcap.o: src/lpcap.cpp
 	g++ -c $(CFLAG) src/lpcap.cpp
+
+llibnet.o: src/llibnet.cpp
+	g++ -c $(CFLAG) src/llibnet.cpp
 
 #######################
 # Principal
