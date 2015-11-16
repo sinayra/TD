@@ -16,7 +16,7 @@ typedef struct {
 	bpf_u_int32 mask;						  	/*Máscara de Subrede*/
 	bpf_u_int32 net;						  	/*Ip da rede*/
 	struct pcap_pkthdr header;					/*Cabeçalho fornecido do pcap*/
-	string packet;								/*O pacote mesmo */
+	string package;								/*O pacote mesmo */
 
 }lpcapType;
 
