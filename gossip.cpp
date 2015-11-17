@@ -29,12 +29,15 @@ void getMessage(string &message){
 }
 
 void server(string &port){
-
+    waitPackage(port);
 }
 
 void host(string &port){
-    sendPackage("HELLO", port);
-    waitPackage(port);
+    string message;
+
+    cout << "Digite: ";
+    getline(cin, message);
+    sendPackage(message, port);
 }
 
 //argv[0]: Nome do programa

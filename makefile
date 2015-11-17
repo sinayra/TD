@@ -1,4 +1,4 @@
-CFLAG=  -lpcap -lnet -O2
+CFLAG=  -lpcap -lnet -O2 -std=c++11
 OBJS = lpcap.o llibnet.o
 
 
