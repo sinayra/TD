@@ -14,7 +14,7 @@ lpcapType lpcap_init(string port){
 	//promiscuo: porque uso vm
 	//timeout em segundos
 	//mensagem de erro
-	p.handle = pcap_open_live(p.dev.c_str(), 65536, 1, 10000, errbuf);
+	p.handle = pcap_open_live(p.dev.c_str(), 65536, 1, 1000, errbuf);
 	if (p.handle == NULL) {
 		cout << endl << "[ERROR] Nao foi possivel abrir o dispositivo " << p.dev << " : " << errbuf << endl;
 		exit(EXIT_FAILURE);
@@ -38,21 +38,10 @@ lpcapType lpcap_init(string port){
 	return p;
 }
 
-void _rtmp_print_buff( const u_char *buff, int size ) {
-    int i;
-    for( i = LLIBNET_HEADER ; i < size ; i++ ) {
-        printf( "%c", (u_char) *(buff+i));
-    }
 
-    printf( "\n" );
-}
-
-void lpcap_process(lpcapType p){
-	stringstream ss;
-	const u_char *packet;
-
-	u_int size_ip;
-	u_int size_tcp;
+string lpcap_process(lpcapType p){
+	string message;
+	const u_char *packet ;
 
 	//Limita o trafico inspecionado
 	if (pcap_setfilter(p.handle, &(p.fp)) == -1) {
@@ -62,15 +51,20 @@ void lpcap_process(lpcapType p){
 	}
 	cout << endl << "[DEBUG] Rede filtrada" << endl;
 
-	while(1){ //Mantem no loop enquanto nao ler um pacote
-		packet = pcap_next(p.handle, p.header);
-		if(packet == 0)
-			continue;
-		cout << endl << "[DEBUG] Terminou captura" << endl;
-		cout << endl << "[DEBUG] Header len: " << p.header->len << " Header caplen: " << p.header->caplen << endl;
-	    _rtmp_print_buff( packet, p.header->caplen );
-	    break;
-	}
+	while(!pcap_next_ex(p.handle, &(p.header), &packet)) //Enquanto nao conseguiu ler pacote, continue tentando
+		cout << "[DEBUG] Nao conseguiu capturar pacote." << endl;
+
+	cout << endl << "[DEBUG] Terminou captura" << endl;
+	cout << endl << "[DEBUG] Header len: " << p.header->len << " Header caplen: " << p.header->caplen << endl;
+
+    message.clear();
+    for( int i = LLIBNET_HEADER ; i < p.header->caplen ; i++ ) {
+    	char c;
+    	c = (char) *(packet+i);
+        message += c;
+    }
+
+    return message;
 	
 }
 

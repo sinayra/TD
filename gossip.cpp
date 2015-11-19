@@ -16,10 +16,13 @@ void sendPackage(string message, string &port){ //Enpacota mensagem e a envia
 //lpcap
 void waitPackage(string &port){ //Espera receber o pacote
     lpcapType package;
+    string message;
 
     package = lpcap_init(port); 
-    lpcap_process(package); 
+    message = lpcap_process(package); 
     lpcap_free(package); 
+
+    cout << endl << "[DEBUG] Mensagem recebida: " << message << endl;
 }
 
 void getMessage(string &message){
