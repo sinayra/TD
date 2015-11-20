@@ -6,7 +6,10 @@
 #include <iostream>
 #include <stdio.h>
 
-#define LLIBNET_HEADER 42
+#define IPV4_H   20
+#define UDP_H   8 
+#define ETHERNET_H 14
+#define PACKAGE_HEADER UDP_H+IPV4_H+ETHERNET_H
 using namespace std;
 
 typedef struct {

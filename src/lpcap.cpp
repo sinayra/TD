@@ -41,7 +41,7 @@ lpcapType lpcap_init(string port){
 
 string lpcap_process(lpcapType p){
 	string message;
-	const u_char *packet ;
+	const u_char *packet;
 
 	//Limita o trafico inspecionado
 	if (pcap_setfilter(p.handle, &(p.fp)) == -1) {
@@ -58,7 +58,7 @@ string lpcap_process(lpcapType p){
 	cout << endl << "[DEBUG] Header len: " << p.header->len << " Header caplen: " << p.header->caplen << endl;
 
     message.clear();
-    for( int i = LLIBNET_HEADER ; i < p.header->caplen ; i++ ) {
+    for( int i = PACKAGE_HEADER ; i < p.header->caplen ; i++ ) {
     	char c;
     	c = (char) *(packet+i);
         message += c;
