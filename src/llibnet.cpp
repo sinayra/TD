@@ -63,7 +63,7 @@ void prepareAndSendPackage(string &message, string &port){
 
 	//CABEÇALHO IP----------------------------------------------------------------------------
 
-	if (libnet_autobuild_ipv4(LIBNET_IPV4_H + 20 + payload_s + LIBNET_UDP_H, IPPROTO_UDP, ip_addr, l) == -1 ) {
+	if (libnet_autobuild_ipv4(LIBNET_IPV4_H + payload_s + LIBNET_UDP_H, IPPROTO_UDP, ip_addr, l) == -1 ) {
 		//printf("Nao pode construir o cabecalho IP: %s\n",\
 		//libnet_geterror(l));
 		cout << endl << "[ERROR] Nao pode construir o cabecalho IP: " << libnet_geterror(l) << endl << "Encerrando..." << endl;
