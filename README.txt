@@ -6,6 +6,7 @@ Sinayra Pascoal Cotts Moreira - 10/0020666
 Resumo:
 
 Dependências:
+	sudo apt-get install g++
 	sudo apt-get install libnet1-dev
 	sudo apt-get install libpcap-dev
 
