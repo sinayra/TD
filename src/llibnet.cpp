@@ -2,7 +2,7 @@
 
 void prepareAndSendPackage(string &message, string &port){
 
-
+	stringstream s;
 	libnet_t *l; //CONTEXTO LIBNET
 	
 	char errbuf[LIBNET_ERRBUF_SIZE], ip_addr_str[16] = "127.0.0.1";
@@ -15,7 +15,9 @@ void prepareAndSendPackage(string &message, string &port){
 					);
 	if ( l == NULL ) {
 		//fprintf(stderr, "libnet_init() failed: %s\n", errbuf);
-		cout << endl << "[ERROR] Falha ao inicializar libnet: " << errbuf << endl << "Encerrando..." << endl;
+		s.clear();
+		s << "Falha ao inicializar libnet: " << errbuf;
+		showLog(error, s.str());
 		exit(EXIT_FAILURE);
 	}
 
@@ -34,7 +36,7 @@ void prepareAndSendPackage(string &message, string &port){
 	u_int32_t ip_addr = libnet_name2addr4(l, ip_addr_str, LIBNET_DONT_RESOLVE);
 	if ( ip_addr == -1 ) {
 		//printf("Erro na conversao do endereco.\n");
-		cout << endl << "[ERROR] Erro na conversao do endereco. Encerrando..."  << endl;
+		showLog(error, "Erro na conversao do endereco");
 		libnet_destroy(l);
 		exit(EXIT_FAILURE);
 	}
@@ -54,7 +56,9 @@ void prepareAndSendPackage(string &message, string &port){
 	if (udp == -1)
 	{
 		//printf("Nao pode construir o cabecalho UDP: %s\n", libnet_geterror(l));
-		cout << endl << "[WARNING] Nao pode construir o cabecalho UPD: " << libnet_geterror(l) << endl;
+		s.clear();
+		s << "Nao pode construir o cabecalho UPD: " << libnet_geterror(l);
+		showLog(warning, s.str());
 	}
 
 	//----------------------------------------------------------------------------------------
@@ -66,7 +70,9 @@ void prepareAndSendPackage(string &message, string &port){
 	if (libnet_autobuild_ipv4(LIBNET_IPV4_H + payload_s + LIBNET_UDP_H, IPPROTO_UDP, ip_addr, l) == -1 ) {
 		//printf("Nao pode construir o cabecalho IP: %s\n",\
 		//libnet_geterror(l));
-		cout << endl << "[ERROR] Nao pode construir o cabecalho IP: " << libnet_geterror(l) << endl << "Encerrando..." << endl;
+		s << "Nao pode construir o cabecalho IP: " << libnet_geterror(l);
+		showLog(error, s.str());
+
 		libnet_destroy(l);
 		exit(EXIT_FAILURE);
 	}
@@ -77,12 +83,18 @@ void prepareAndSendPackage(string &message, string &port){
 	//ESCREVE NO CANAL
 
 	bytes_escritos = libnet_write(l);
-	if ( bytes_escritos != -1 )
+	if ( bytes_escritos != -1 ){
 		//printf("%d bytes foram enviados.\n", bytes_escritos);
-		cout << endl << "[DEBUG] " << bytes_escritos << " bytes foram enviados." << endl;
-	else
-		cout << endl << "[WARNING] Erro no envio do pacote: " << libnet_geterror(l) << endl;
+		s.clear();
+		s << bytes_escritos << " bytes foram enviados.";
+		showLog(debug, s.str());
+	}
+	else{
+		s.clear();
+		s << "Erro no envio do pacote: " << libnet_geterror(l);
+		showLog(warning, s.str());
 		//printf("Erro no envio do pacote: %s\n", libnet_geterror(l));
+	}
 
 	libnet_destroy(l);
 

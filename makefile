@@ -1,5 +1,5 @@
 CFLAG=  -lpcap -lnet -O2 -std=c++11
-OBJS = lpcap.o llibnet.o
+OBJS = lpcap.o llibnet.o log.o
 
 
 gossip: gossipCompleto
@@ -13,6 +13,9 @@ lpcap.o: src/lpcap.cpp
 
 llibnet.o: src/llibnet.cpp
 	g++ -c $(CFLAG) src/llibnet.cpp
+
+log.o: src/log.cpp
+	g++ -c $(CFLAG) src/log.cpp
 
 #######################
 # Principal

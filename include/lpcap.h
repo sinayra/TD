@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 #include <stdio.h>
+#include <time.h>
+#include "log.h"
 
 #define IPV4_H   20
 #define UDP_H   8 
@@ -24,5 +26,5 @@ typedef struct {
 
 
 lpcapType lpcap_init(string port); //Seta headers
-string lpcap_process(lpcapType p); //Captura mensagem e retorna string da mensagem
+string lpcap_process(lpcapType p, int timeout); //Captura mensagem e retorna string da mensagem
 void lpcap_free(lpcapType p); //Libera recursos de lpcap
