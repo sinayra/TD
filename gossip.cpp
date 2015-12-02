@@ -1,5 +1,6 @@
 #include "include/lpcap.h"
 #include "include/llibnet.h"
+#include "include/log.h"
 #include <locale>
 #include <string>
 
@@ -17,13 +18,12 @@ void sendPackage(string message, string &port){ //Enpacota mensagem e a envia
 string waitPackage(string &port){ //Espera receber o pacote
     lpcapType package;
     string message;
-    int timeout = 15;
+    int timeout = 15; //timeout em segundos
 
     package = lpcap_init(port); 
     message = lpcap_process(package, timeout); 
     lpcap_free(package); 
 
-    //cout << endl << "[DEBUG] Mensagem recebida: " << message << endl;
     return message;
 }
 
@@ -35,55 +35,67 @@ void getMessage(string &message){
 }
 
 void server(string &port){
-    string message;
+    string message_tx, message_rx;
     
-    message = waitPackage(port); //espera mensagens de boas vindas
+    message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message.compare("HELLO SRV")){ //se a primeira mensagem for HELLO SRV
-        cout << "[HOST]: " << message << endl; //Cliente mandou hello
+    if(!message_rx.compare("HELLO SRV")){ //se a primeira mensagem for HELLO SRV
+        cout << "[HOST]: " << message_rx << endl; //Cliente mandou hello
 
         sendPackage("HELLO CLT", port);
 
         do{
+            message_rx.clear();
+            message_rx = waitPackage(port); //espera nova mensagem
+
+            if(!message_rx.empty())
+                cout << "[HOST]: " << message_rx << endl; 
+
+            message_tx.clear();
+            getMessage(message_tx); //pega mensagem
+            sendPackage(message_tx, port); //envia mensagem
+        
             
-            message = waitPackage(port); //espera nova mensagem
-            if(!message.empty()){
-                cout << "[HOST]: " << message << endl; 
-                sendPackage("<ECHO> '" + message + "'", port); //envia ECHO
-            }
-            
-        }while(!message.empty());
+        }while(message_tx.compare( "BYE CLT")); //enquanto nao for bye
 
         do{
-            sendPackage("BYE CLT", port); //envia bye
-            message.clear();
-            message = waitPackage(port);
-        }while(message.compare("BYE SRV")); //enquanto nao for bye, espera mensagem
-        cout << "[HOST]: " << message << endl;
+            message_rx.clear();
+            message_rx = waitPackage(port);
+        }while(message_rx.compare("BYE SRV")); //enquanto nao for bye, espera mensagem
+        cout << "[HOST]: " << message_rx << endl;
+    }
+    else{
+        showLog(error, "HOST nao encontrado. Encerrando...");
     }
 
 }
 
 void host(string &port){
-    string message;
+    string message_rx, message_tx;
 
     sendPackage("HELLO SRV", port); //inicia conexao
-    message = waitPackage(port); //espera mensagens de boas vindas
+    message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message.compare("HELLO CLT")){ //se a primeira mensagem for HELLO CLT
-        cout << "[SERVER]: " << message << endl;
+    if(!message_rx.compare("HELLO CLT")){ //se a primeira mensagem for HELLO CLT
+        cout << "[SERVER]: " << message_rx << endl;
 
         do{
-            message.clear();
-            getMessage(message); //pega mensagem
-            sendPackage(message, port); //envia mensagem
-            message.clear();
+            message_tx.clear();
+            getMessage(message_tx); //pega mensagem
+            sendPackage(message_tx, port); //envia mensagem
+            
+            message_rx.clear();
 
-            message = waitPackage(port); //espera echo
-            cout << "[SERVER]: " << message << endl;
-        }while(message.compare("BYE CLT")); //enquanto nao for bye
+            message_rx = waitPackage(port); //espera echo
+            if(!message_rx.empty())
+                cout << "[SERVER]: " << message_rx << endl;
+        }while(message_rx.compare("BYE CLT")); //enquanto nao for bye
+
+        sendPackage("BYE SRV", port); //envia bye
     }
-    sendPackage("BYE SRV", port); //envia bye
+    else{
+        showLog(error, "SERVER nao encontrado. Encerrando...");
+    }
 }
 
 //argv[0]: Nome do programa
@@ -91,9 +103,10 @@ void host(string &port){
 //argv[2]: porta
 int main(int argc, char *argv[]){
     string mode, port;
+    stringstream s;
 
     if(argc < 2 || argc > 3){
-        cout << endl << "[ERROR] Quantidade de argumentos incorreta. Encerrando..." << endl;
+        showLog(error, "Quantidade de argumentos incorreta. Encerrando...");
         exit(EXIT_FAILURE);
     }
 
@@ -106,15 +119,15 @@ int main(int argc, char *argv[]){
     }
 
     if(!mode.compare("-S")){
-        cout << endl << "[DEBUG] Modo servidor escolhido. Porta: " << port << endl;
+        cout << endl << "Modo servidor escolhido. Porta: " << port << endl;
         server(port);
     }
     else if (!mode.compare("HOST")){
-        cout << endl << "[DEBUG] Modo cliente escolhido. Porta: " << port << endl;
+        cout << endl << "Modo cliente escolhido. Porta: " << port << endl;
         host(port);
     }
     else{
-        cout << endl << "[ERROR] Opcao invalida. Encerrando..." << endl;
+        showLog(error, "Opcao invalida. Encerrando...");
         exit(EXIT_FAILURE);
     }
 

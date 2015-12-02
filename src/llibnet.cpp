@@ -15,7 +15,7 @@ void prepareAndSendPackage(string &message, string &port){
 					);
 	if ( l == NULL ) {
 		//fprintf(stderr, "libnet_init() failed: %s\n", errbuf);
-		s.clear();
+		s.str("");
 		s << "Falha ao inicializar libnet: " << errbuf;
 		showLog(error, s.str());
 		exit(EXIT_FAILURE);
@@ -56,7 +56,7 @@ void prepareAndSendPackage(string &message, string &port){
 	if (udp == -1)
 	{
 		//printf("Nao pode construir o cabecalho UDP: %s\n", libnet_geterror(l));
-		s.clear();
+		s.str("");
 		s << "Nao pode construir o cabecalho UPD: " << libnet_geterror(l);
 		showLog(warning, s.str());
 	}
@@ -85,12 +85,12 @@ void prepareAndSendPackage(string &message, string &port){
 	bytes_escritos = libnet_write(l);
 	if ( bytes_escritos != -1 ){
 		//printf("%d bytes foram enviados.\n", bytes_escritos);
-		s.clear();
+		s.str("");
 		s << bytes_escritos << " bytes foram enviados.";
 		showLog(debug, s.str());
 	}
 	else{
-		s.clear();
+		s.str("");
 		s << "Erro no envio do pacote: " << libnet_geterror(l);
 		showLog(warning, s.str());
 		//printf("Erro no envio do pacote: %s\n", libnet_geterror(l));

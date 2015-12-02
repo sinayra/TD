@@ -3,9 +3,9 @@
 #include <string>
 #include <sstream>
 
-#define SHOW_DEBUG false		//mostrar debug
-#define SHOW_WARNING true		//mostrar warning
-#define SHOW_ERROR true			//mostrar erro
+#define SHOW_DEBUG 1		//mostrar debug
+#define SHOW_WARNING 1		//mostrar warning
+#define SHOW_ERROR 1			//mostrar erro
 
 using namespace std;
 

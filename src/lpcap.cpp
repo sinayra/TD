@@ -13,11 +13,11 @@ lpcapType lpcap_init(string port){
 	//device
 	//tamanho dos pacotes em bytes
 	//promiscuo: porque uso vm
-	//timeout em segundos
+	//timeout em milisegundos
 	//mensagem de erro
 	p.handle = pcap_open_live(p.dev.c_str(), 65536, 1, 1000, errbuf);
 	if (p.handle == NULL) {
-		s.clear();
+		s.str("");
 		s << "Nao foi possivel abrir o dispositivo " << p.dev << " : " << errbuf;
 		showLog(error, s.str());
 		exit(EXIT_FAILURE);
@@ -32,7 +32,7 @@ lpcapType lpcap_init(string port){
 	//otimizaçao
 	//ip da rede
 	if (pcap_compile(p.handle, &(p.fp), p.filter_exp.c_str(), 0, p.net) == -1) {
-		s.clear();
+		s.str("");
 		s << "Erro ao realizar parsing da expressao '" << p.filter_exp << "' : " << pcap_geterr(p.handle);
 		showLog(error, s.str());
 		exit(EXIT_FAILURE);
@@ -48,10 +48,11 @@ string lpcap_process(lpcapType p, int timeout){
 	time_t start, end, diff;
 	const u_char *packet;
 	stringstream s;
+	int status;
 
 	//Limita o trafico inspecionado
 	if (pcap_setfilter(p.handle, &(p.fp)) == -1) {
-		s.clear();
+		s.str("");
 		s << "Nao foi possivel inspecionar o trafico : " << pcap_geterr(p.handle);
 		showLog(error, s.str());
 		exit(EXIT_FAILURE);
@@ -59,14 +60,28 @@ string lpcap_process(lpcapType p, int timeout){
 	showLog(debug, "Rede filtrada");
 
 	time(&start);
+	
 	do{
 		time(&end);
 		diff = difftime(end, start);
-		showLog(debug, "Nao conseguiu capturar pacote.");
-	}while(!pcap_next_ex(p.handle, &(p.header), &packet) && diff < timeout);//Enquanto nao conseguiu ler pacote e nao deu timeout, continue tentando
+		s.str("");
+		s << "Tempo decorrido: " << diff << "s";
+		showLog(debug, s.str());
+
+		//1: pacote lido com sucesso
+		//0: tentou ler pacote, mas nao conseguiu porque o timeout do pcap_next_ex expirou
+		//-1: Um errou ocorreu enquanto lia pacote
+		//-2: tentou ler pacotes de savefile e nao tinha pacotes de savefile
+		status = pcap_next_ex(p.handle, &(p.header), &packet);
+		if(status < 0){
+			s.str("");
+			s << "Codigo: " << status << "\t " << pcap_geterr(p.handle);
+			showLog(warning, s.str());
+		}
+	}while(status < 1 && diff < timeout);//Enquanto nao conseguiu ler pacote e nao deu timeout, continue tentando
 
 	showLog(debug, "Terminou captura");
-	s.clear();
+	s.str("");
 	s << "Header len: " << p.header->len << " Header caplen: " << p.header->caplen;
 	showLog(debug, s.str());
 
