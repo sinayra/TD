@@ -55,7 +55,6 @@ void server(string &port){
             getMessage(message_tx); //pega mensagem
             sendPackage(message_tx, port); //envia mensagem
         
-            
         }while(message_tx.compare( "BYE CLT")); //enquanto nao for bye
 
         do{
