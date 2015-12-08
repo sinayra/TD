@@ -32,13 +32,16 @@ string waitPackage(string &port){ //Espera receber o pacote
 void getMessage(string &message){
     int timeout = TIMEOUT * 1000; //timeout em milisegundos
     struct pollfd mypoll = { STDIN_FILENO, POLLIN|POLLPRI};
+    string message_aux;
 
     cout << endl << "Digite a mensagem: ";
     cout.flush(); //forca escrever na tela o que ta em cout
     if( poll(&mypoll, 1, timeout) ) //espera por 15 segundos para receber mensagem
-        getline(cin, message);
+        getline(cin, message_aux);
     else
         showLog(warning, "Timeout");
+
+    message = "1" + message_aux;
     
 }
 
@@ -47,27 +50,31 @@ void server(string &port){
     
     message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message_rx.compare("HELLO SRV")){ //se a primeira mensagem for HELLO SRV e for automatica
+    if(!message_rx.compare("0HELLO SRV")){ //se a primeira mensagem for HELLO SRV e for automatica
+        message_rx.erase(0, 1); //apaga identificador de mensagem
         cout << "[HOST]: " << message_rx << endl; //Cliente mandou hello
 
-        sendPackage("HELLO CLT", port);
+        sendPackage("0HELLO CLT", port);
 
         do{
             message_rx.clear();
             message_rx = waitPackage(port); //espera nova mensagem
 
-            if(!message_rx.empty())
+            if(!message_rx.empty()){
+                message_rx.erase(0, 1);
                 cout << "[HOST]: " << message_rx << endl; 
+            }
 
             message_tx.clear();
             getMessage(message_tx); //pega mensagem
             sendPackage(message_tx, port); //envia mensagem
-        }while(message_tx.compare( "BYE CLT")); //enquanto nao for bye
+        }while(message_tx.compare( "1BYE CLT")); //enquanto nao for bye
         
             do{
                 message_rx.clear();
                 message_rx = waitPackage(port);
-            }while(message_rx.compare("BYE SRV"));
+            }while(message_rx.compare("0BYE SRV"));
+            message_rx.erase(0, 1); //apaga identificador de mensagem
             cout << "[HOST]: " << message_rx << endl;
 
     }
@@ -80,10 +87,11 @@ void server(string &port){
 void host(string &port){
     string message_rx, message_tx;
 
-    sendPackage("HELLO SRV", port); //inicia conexao
+    sendPackage("0HELLO SRV", port); //inicia conexao
     message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message_rx.compare("HELLO CLT") ){ //se a primeira mensagem for HELLO CLT
+    if(!message_rx.compare("0HELLO CLT") ){ //se a primeira mensagem for HELLO CLT
+        message_rx.erase(0, 1);
         cout << "[SERVER]: " << message_rx << endl;
 
         do{
@@ -94,12 +102,14 @@ void host(string &port){
             message_rx.clear();
 
             message_rx = waitPackage(port); //espera echo
-            if(!message_rx.empty())
+            if(!message_rx.empty()){
+                message_rx.erase(0, 1);
                 cout << "[SERVER]: " << message_rx << endl;
+            }
 
         }while(message_rx.compare("BYE CLT")); //enquanto nao for bye e enquanto servidor esta escrevendo mensagens como usuario
 
-        sendPackage("BYE SRV", port); //envia bye
+        sendPackage("0BYE SRV", port); //envia bye
     }
     else{
         showLog(error, "SERVER nao encontrado. Encerrando...");
