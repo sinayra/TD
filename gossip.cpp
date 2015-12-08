@@ -10,8 +10,6 @@
 
 using namespace std;
 
-bool g_user; //variavel global que define se a mensagem atual foi escrita por um usuario ou mandada automaticamente
-
 //llibnet
 void sendPackage(string message, string &port){ //Enpacota mensagem e a envia
     prepareAndSendPackage(message, port);
@@ -29,6 +27,7 @@ string waitPackage(string &port){ //Espera receber o pacote
 
     return message;
 }
+
 
 void getMessage(string &message){
     int timeout = TIMEOUT * 1000; //timeout em milisegundos
@@ -48,11 +47,10 @@ void server(string &port){
     
     message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message_rx.compare("HELLO SRV") && !g_user){ //se a primeira mensagem for HELLO SRV e for automatica
+    if(!message_rx.compare("HELLO SRV")){ //se a primeira mensagem for HELLO SRV e for automatica
         cout << "[HOST]: " << message_rx << endl; //Cliente mandou hello
 
         sendPackage("HELLO CLT", port);
-        g_user = false;
 
         do{
             message_rx.clear();
@@ -63,15 +61,15 @@ void server(string &port){
 
             message_tx.clear();
             getMessage(message_tx); //pega mensagem
-            g_user = 1; //define que um usuario ta mandando mensagem
             sendPackage(message_tx, port); //envia mensagem
         }while(message_tx.compare( "BYE CLT")); //enquanto nao for bye
+        
+            do{
+                message_rx.clear();
+                message_rx = waitPackage(port);
+            }while(message_rx.compare("BYE SRV"));
+            cout << "[HOST]: " << message_rx << endl;
 
-        do{
-            message_rx.clear();
-            message_rx = waitPackage(port);
-        }while(message_rx.compare("BYE SRV") && !g_user); //enquanto nao for bye, espera mensagem automatica
-        cout << "[HOST]: " << message_rx << endl;
     }
     else{
         showLog(error, "HOST nao encontrado. Encerrando...");
@@ -82,15 +80,13 @@ void server(string &port){
 void host(string &port){
     string message_rx, message_tx;
 
-    g_user = false;
     sendPackage("HELLO SRV", port); //inicia conexao
     message_rx = waitPackage(port); //espera mensagens de boas vindas
 
-    if(!message_rx.compare("HELLO CLT") && !g_user){ //se a primeira mensagem for HELLO CLT e for automatica
+    if(!message_rx.compare("HELLO CLT") ){ //se a primeira mensagem for HELLO CLT
         cout << "[SERVER]: " << message_rx << endl;
 
         do{
-            g_user = true;
             message_tx.clear();
             getMessage(message_tx); //pega mensagem
             sendPackage(message_tx, port); //envia mensagem
@@ -100,9 +96,9 @@ void host(string &port){
             message_rx = waitPackage(port); //espera echo
             if(!message_rx.empty())
                 cout << "[SERVER]: " << message_rx << endl;
-        }while(message_rx.compare("BYE CLT") && g_user); //enquanto nao for bye e enquanto servidor esta escrevendo mensagens como usuario
 
-        g_user = false;
+        }while(message_rx.compare("BYE CLT")); //enquanto nao for bye e enquanto servidor esta escrevendo mensagens como usuario
+
         sendPackage("BYE SRV", port); //envia bye
     }
     else{
